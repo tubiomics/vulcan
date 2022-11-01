@@ -1,0 +1,32 @@
+name: nextflow-vulcan
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+  - agbiome
+dependencies:
+  - perl=5.26.2  # krono dependency
+  - libzlib=1.2.13 # kaiji dependency
+  - python=3.11.0 # eggnog dependency
+  - fastp=0.23.2
+  - seqkit=2.3.1
+  - kaiju=1.9.0
+  - krona=2.8.1
+  - bbtools=37.62
+  - megahit=1.2.9
+  - cd-hit=4.8.1
+  - cd-hit-auxtools=4.8.1
+  - seqtk=1.3
+  - samtools=1.16.1
+  - bwa-mem2=2.2.1
+  - maxbin2=2.2.7
+  - drep=3.4.0
+  - prokka=1.14.6
+  - eggnog-mapper=2.1.9
+  - interproscan=5.55_88.0
+  # - checkm-genome=1.2.2 # requires pysam >=0.15.3
+  # - amos=3.1.0  # needs python 2.7 and perl 5.22
+  # - concoct=1.1.0 # needs python 2.7 might need its own container
+  # - traitar=1.1.2 # needs python 2.7 might need its own container
+  # - metabat2=2.15
+  # - gtdbtk=2.1.1
