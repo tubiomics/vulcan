@@ -73,7 +73,7 @@ process trimReads {
   script:
     """
     fastp \
-    -i ${reads[0]} \ 
+    -i ${reads[0]} \
     -I ${reads[1]} \
     -o "${sample}.trim.R1.fq.gz" \
     -O "${sample}.trim.R2.fq.gz" \
