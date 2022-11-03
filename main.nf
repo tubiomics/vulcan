@@ -1,5 +1,52 @@
 params.reads = "$projectDir/data/raw/reads"
 params.outdir = 'results'
+params.help = ""
+
+ANSI_GREEN = "\033[1;32m"
+ANSI_RED = "\033[1;31m"
+ANSI_RESET = "\033[0m"
+
+if (params.help) {
+    helpMessage()
+    exit(0)
+}
+
+log.info """
+        ===========================================
+         P R O J E C T    V U L C A N
+         
+         Metagenome Assembly Pipeline
+
+
+         Used parameters:
+        -------------------------------------------
+         --reads            : ${params.reads}
+
+         Runtime data:
+        -------------------------------------------
+         Running with profile:   ${ANSI_GREEN}${workflow.profile}${ANSI_RESET}
+         Run container:          ${ANSI_GREEN}${workflow.container}${ANSI_RESET}
+         Running as user:        ${ANSI_GREEN}${workflow.userName}${ANSI_RESET}
+         Launch dir:             ${ANSI_GREEN}${workflow.launchDir}${ANSI_RESET}
+         Base dir:               ${ANSI_GREEN}${baseDir}${ANSI_RESET}
+         """
+         .stripIndent()
+
+def helpMessage() {
+log.info """
+        ===========================================
+         P R O J E C T    V U L C A N
+         
+         Metagenome Assembly Pipeline
+
+         Usage:
+        -------------------------------------------
+         --reads            : directory with fastq files, default is "fastq"
+        ===========================================
+         """
+         .stripIndent()
+
+}
 
 process countReads {
   input:
@@ -25,17 +72,16 @@ process trimReads {
 
   script:
     """
-    fastp -i ${reads[0]} -I ${reads[1]} -o "${sample}.trim.R1.fq.gz" -O "${sample}.trim.R2.fq.gz" --length_required 50 -h "${sample}.html" -w 16
+    fastp \
+    -i ${reads[0]} \ 
+    -I ${reads[1]} \
+    -o "${sample}.trim.R1.fq.gz" \
+    -O "${sample}.trim.R2.fq.gz" \
+    --length_required 50 \
+    -h "${sample}.html" \
+    -w 16
     """
 }
-/* 
- * prints user convenience 
- */
-println "P R O J E C T    V U L C A N     "
-println "                                 "
-println "  Metagenome Assembly Pipeline   "
-println "================================="
-println "Input Path           : ${params.reads}"
 
 
 workflow {
