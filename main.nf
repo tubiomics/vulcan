@@ -1,3 +1,6 @@
+#!/usr/bin/env nextflow
+nextflow.enable.dsl=2
+
 params.reads = "$projectDir/data/raw/reads"
 params.outdir = 'results'
 params.help = ""
