@@ -2,6 +2,7 @@
 nextflow.enable.dsl=2
 
 params.reads = "$projectDir/data/raw/reads"
+params.kaijudb = "$projectDir/data/kaijudb/kaiju_db_fungi_2022-03-29/kaiju_db_fungi.fmi"
 params.outdir = 'results'
 params.help = ""
 
