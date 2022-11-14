@@ -2,7 +2,9 @@
 nextflow.enable.dsl=2
 
 params.reads = "$projectDir/data/raw/reads"
-params.kaijudb = "$projectDir/data/kaijudb/kaiju_db_fungi_2022-03-29/kaiju_db_fungi.fmi"
+params.kaiju_db = "$projectDir/data/kaijudb/kaiju_db_fungi_2022-03-29/kaiju_db_fungi.fmi"
+params.kaiju_names = "$projectDir/data/kaijudb/kaiju_db_fungi_2022-03-29/names.dmp"
+params.kaiju_nodes = "$projectDir/data/kaijudb/kaiju_db_fungi_2022-03-29/nodes.dmp"
 params.outdir = 'results'
 params.help = ""
 
@@ -25,6 +27,10 @@ log.info """
          Used parameters:
         -------------------------------------------
          --reads            : ${params.reads}
+         --kaiju_db         : ${params.kaiju_db}
+         --kaiju_names      : ${params.kaiju_names}
+         --kaiju_nodes      : ${params.kaiju_nodes}
+
 
          Runtime data:
         -------------------------------------------
@@ -46,6 +52,9 @@ log.info """
          Usage:
         -------------------------------------------
          --reads            : directory with fastq files, default is "fastq"
+         --kaiju_db         : full path (or S3 bucket) to the kaiju database (.fmi file extension)
+         --kaiju_names      : full path (or S3 bucket) to the kaiju names.dmp file
+         --kaiju_nodes      : full path (or S3 bucket) to the kaiju nodes.dmp file
         ===========================================
          """
          .stripIndent()
@@ -89,8 +98,8 @@ process trimReads {
 
 
 workflow {
-  stats_ch = Channel.fromPath("$params.reads/*fastq.gz", checkIfExists: true)
-  trim_ch = Channel.fromFilePairs("$params.reads/*_{1,2}.fastq.gz", checkIfExists:true)
-  countReads(stats_ch)
-  trimReads(trim_ch)
+  // stats_ch = Channel.fromPath("$params.reads/*fastq.gz", checkIfExists: true)
+  // trim_ch = Channel.fromFilePairs("$params.reads/*_{1,2}.fastq.gz", checkIfExists:true)
+  // countReads(stats_ch)
+  // trimReads(trim_ch)
 }
