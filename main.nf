@@ -2,9 +2,9 @@
 nextflow.enable.dsl=2
 
 params.reads = "$projectDir/data/raw/reads"
-params.kaiju_db = "$projectDir/data/kaijudb/kaiju_db_fungi_2022-03-29/kaiju_db_fungi.fmi"
-params.kaiju_names = "$projectDir/data/kaijudb/kaiju_db_fungi_2022-03-29/names.dmp"
-params.kaiju_nodes = "$projectDir/data/kaijudb/kaiju_db_fungi_2022-03-29/nodes.dmp"
+params.kaiju_db = "$projectDir/data/kaijudb/viruses/kaiju_db_viruses.fmi"
+params.kaiju_names = "$projectDir/data/kaijudb/viruses/names.dmp"
+params.kaiju_nodes = "$projectDir/data/kaijudb/viruses/nodes.dmp"
 params.outdir = 'results'
 params.help = ""
 
@@ -81,7 +81,7 @@ process trimReads {
     tuple val(sample), file(reads)
 
   output:
-    path "$sample.*.gz"
+    tuple val(sample), path("$sample.*.gz")
 
   script:
     """
@@ -96,10 +96,31 @@ process trimReads {
     """
 }
 
+process taxanomic_classification {
+  tag "$sample"
+
+  input:
+    tuple val(sample), file(trimmed_reads)
+    path nodes
+    path db
+
+  output:
+    path "${sample}.kaiju.out"
+
+  script:
+    """
+    kaiju -t $nodes -f $db -i ${trimmed_reads[0]} -j ${trimmed_reads[1]} -o "${sample}.kaiju.out" -z 6 -v
+    """
+}
+
 
 workflow {
-  // stats_ch = Channel.fromPath("$params.reads/*fastq.gz", checkIfExists: true)
-  // trim_ch = Channel.fromFilePairs("$params.reads/*_{1,2}.fastq.gz", checkIfExists:true)
-  // countReads(stats_ch)
-  // trimReads(trim_ch)
+  kaiju_db_ch = Channel.fromPath("$params.kaiju_db", checkIfExists: true)
+  kaiju_nodes_ch = Channel.fromPath("$params.kaiju_nodes", checkIfExists: true)
+  kaiju_names_ch = Channel.fromPath("$params.kaiju_names", checkIfExists: true)
+  stats_ch = Channel.fromPath("$params.reads/*fastq.gz", checkIfExists: true)
+  trim_ch = Channel.fromFilePairs("$params.reads/*_{1,2}.fastq.gz", checkIfExists:true)
+  countReads(stats_ch)
+  trimReads(trim_ch)
+  taxanomic_classification(trimReads.out, kaiju_db_ch, kaiju_nodes_ch)
 }
