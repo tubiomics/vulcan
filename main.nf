@@ -109,8 +109,51 @@ process taxanomic_classification {
 
   script:
     """
-    kaiju -t $nodes -f $db -i ${trimmed_reads[0]} -j ${trimmed_reads[1]} -o "${sample}.kaiju.out" -z 6 -v
+    kaiju -t $nodes -f $db -i ${trimmed_reads[0]} -j ${trimmed_reads[1]} -o "${sample}.kaiju.out" -v
     """
+}
+
+process kaiju_to_krona {
+  input:
+    path kaiju
+    path nodes
+    path names
+
+  output:
+    path "${kaiju.baseName}.kaiju.out.krona"
+  
+  script:
+  """
+  kaiju2krona -t ${nodes} -n ${names} -i ${kaiju} -o "${kaiju.baseName}.kaiju.out.krona"
+  """
+}
+
+process krona_import_text {
+  input:
+    path krona
+
+  output:
+    path "${krona.baseName}.kaiju.out.krona.html"
+    
+  script:
+  """
+  ktImportText -o "${krona.baseName}.kaiju.out.krona.html" ${krona}
+  """
+}
+
+process kaiju_to_table {
+  input:
+    path kaiju
+    path nodes
+    path names
+  
+  output:
+    path "${kaiju.baseName}.kaiju.summary.tsv"
+
+  script:
+  """
+  kaiju2table -t ${nodes} -n ${names} -r species -l superkingdom,phylum,class,order,family,genus,species -o "${kaiju.baseName}.kaiju.summary.tsv" ${kaiju}
+  """
 }
 
 
@@ -122,5 +165,8 @@ workflow {
   trim_ch = Channel.fromFilePairs("$params.reads/*_{1,2}.fastq.gz", checkIfExists:true)
   countReads(stats_ch)
   trimReads(trim_ch)
-  taxanomic_classification(trimReads.out, kaiju_db_ch, kaiju_nodes_ch)
+  taxanomic_classification(trimReads.out, kaiju_nodes_ch, kaiju_db_ch)
+  kaiju_to_krona(taxanomic_classification.out, kaiju_nodes_ch, kaiju_names_ch)
+  krona_import_text(kaiju_to_krona.out)
+  kaiju_to_table(taxanomic_classification.out, kaiju_nodes_ch, kaiju_names_ch)
 }
