@@ -30,6 +30,7 @@ log.info """
          --kaiju_db         : ${params.kaiju_db}
          --kaiju_names      : ${params.kaiju_names}
          --kaiju_nodes      : ${params.kaiju_nodes}
+         --max_memory       : ${params.max_memory}
 
 
          Runtime data:
@@ -62,6 +63,8 @@ log.info """
 }
 
 process countReads {
+  label 'process_low'
+
   input:
     path read
 
@@ -75,6 +78,8 @@ process countReads {
 }
 
 process trimReads {
+  label 'process_medium'
+
   tag "$sample"
 
   input:
@@ -97,6 +102,7 @@ process trimReads {
 }
 
 process taxanomic_classification {
+  label 'process_medium'
   tag "$sample"
 
   input:
@@ -114,6 +120,8 @@ process taxanomic_classification {
 }
 
 process kaiju_to_krona {
+  label 'process_low'
+
   input:
     path kaiju
     path nodes
@@ -129,6 +137,8 @@ process kaiju_to_krona {
 }
 
 process krona_import_text {
+  label 'process_low'
+
   input:
     path krona
 
@@ -142,6 +152,8 @@ process krona_import_text {
 }
 
 process kaiju_to_table {
+  label 'process_low'
+  
   input:
     path kaiju
     path nodes
