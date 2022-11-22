@@ -13,14 +13,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: docker/quality-control/Dockerfile
+          - dockerfile: docker/quality-control
             name: vulcan-qc
-          - dockerfile: docker/taxonomic-analysis/Dockerfile
+          - dockerfile: docker/taxonomic-analysis
             name: vulcan-ta
-          - dockerfile: docker/metagenomics-binning/gtdbtk/Dockerfile
+          - dockerfile: docker/metagenomics-binning/gtdbtk
             name: vulcan-gtdbtk
-          - dockerfile: docker/metagenomics-binning/py27/Dockerfile
+          - dockerfile: docker/metagenomics-binning/py27
             name: vulcan-mbpy2
+          - dockerfile: docker/metagenomics-binning/py3
+            name: vulcan-mbpy3
 
     steps:
       -
@@ -42,8 +44,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: .
-          file: ${{ matrix.dockerfile }}
+          context: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.name }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.name }}:buildcache
