@@ -10,3 +10,7 @@ RUN \
       drep=3.4.0 \
       coverm=0.6.1 \
    && micromamba clean -a -y
+
+RUN /opt/conda/bin/python -m pip install Binsanity
+
+COPY Binsanity-profile /opt/conda/bin/Binsanity-profile

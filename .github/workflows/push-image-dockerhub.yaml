@@ -19,6 +19,10 @@ jobs:
             name: vulcan-ta
           - dockerfile: docker/metagenomics-binning/gtdbtk/Dockerfile
             name: vulcan-gtdbtk
+          - dockerfile: docker/metagenomics-binning/py3
+            name: vulcan-mbpy3
+          - dockerfile: docker/metagenomics-binning/py27/Dockerfile
+            name: vulcan-mbpy2
 
     steps:
       -
