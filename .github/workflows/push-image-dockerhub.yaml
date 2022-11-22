@@ -17,6 +17,8 @@ jobs:
             name: vulcan-qc
           - dockerfile: docker/taxonomic-analysis/Dockerfile
             name: vulcan-ta
+          - dockerfile: docker/metagenomics-binning/gtdbtk/Dockerfile
+            name: vulcan-gtdbtk
 
     steps:
       -
