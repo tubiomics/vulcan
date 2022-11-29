@@ -62,12 +62,7 @@ log.info """
 
 }
 
-include { COUNT_READS } from './modules/seqkit/count_reads.nf'
-include { TRIM_READS  } from './modules/fastp/trim_reads.nf'
-include { TAXANOMIC_CLASSIFICATION}  from './modules/kaiju/taxanomic_classification.nf'
-include { KAIJU_TO_KRONA } from './modules/kaiju/kaiju_to_krona.nf'
-include { KRONA_IMPORT_TEXT } from './modules/kaiju/krona_import_text.nf'
-include { KAIJU_TO_TABLE } from './modules/kaiju/kaiju_to_table.nf'
+include { TAXANOMIC_ANALYSIS } from './subworkflows/taxonomic_analysis.nf'
 
 
 workflow {
@@ -76,10 +71,10 @@ workflow {
   ch_kaiju_names = Channel.fromPath("$params.kaiju_names", checkIfExists: true)
   ch_reads = Channel.fromFilePairs("$params.reads", checkIfExists:true)
 
-  COUNT_READS(ch_reads)
-  TRIM_READS(ch_reads)
-  TAXANOMIC_CLASSIFICATION(TRIM_READS.out, ch_kaiju_nodes, ch_kaiju_db)
-  KAIJU_TO_KRONA(TAXANOMIC_CLASSIFICATION.out, ch_kaiju_nodes, ch_kaiju_names)
-  KRONA_IMPORT_TEXT(KAIJU_TO_KRONA.out)
-  KAIJU_TO_TABLE(TAXANOMIC_CLASSIFICATION.out, ch_kaiju_nodes, ch_kaiju_names)
+  TAXANOMIC_ANALYSIS(
+    ch_reads,
+    ch_kaiju_db,
+    ch_kaiju_nodes,
+    ch_kaiju_names
+  )
 }
