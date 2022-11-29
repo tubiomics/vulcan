@@ -3,13 +3,13 @@ process COUNT_READS {
   container 'tubiomics/vulcan-qc:latest'
 
   input:
-    path read
+    tuple val(sample), file(reads)
 
   output:
-    path 'original_fastq_counts.txt'
+    path "${sample}.txt"
 
   script:
     """
-    seqkit stats $read -T > original_fastq_counts.txt
+    seqkit stats ${reads[0]} -T > "${sample}.txt"
     """
 }

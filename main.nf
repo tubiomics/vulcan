@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-params.reads = "$projectDir/data/raw/reads"
+params.reads = "$projectDir/data/raw/reads/*_{1,2}.fastq.gz"
 params.kaiju_db = "$projectDir/data/kaijudb/viruses/kaiju_db_viruses.fmi"
 params.kaiju_names = "$projectDir/data/kaijudb/viruses/names.dmp"
 params.kaiju_nodes = "$projectDir/data/kaijudb/viruses/nodes.dmp"
@@ -74,11 +74,10 @@ workflow {
   ch_kaiju_db = Channel.fromPath("$params.kaiju_db", checkIfExists: true)
   ch_kaiju_nodes = Channel.fromPath("$params.kaiju_nodes", checkIfExists: true)
   ch_kaiju_names = Channel.fromPath("$params.kaiju_names", checkIfExists: true)
-  ch_stats = Channel.fromPath("$params.reads/*fastq.gz", checkIfExists: true)
-  ch_trim = Channel.fromFilePairs("$params.reads/*_{1,2}.fastq.gz", checkIfExists:true)
+  ch_reads = Channel.fromFilePairs("$params.reads", checkIfExists:true)
 
-  COUNT_READS(ch_stats)
-  TRIM_READS(ch_trim)
+  COUNT_READS(ch_reads)
+  TRIM_READS(ch_reads)
   TAXANOMIC_CLASSIFICATION(TRIM_READS.out, ch_kaiju_nodes, ch_kaiju_db)
   KAIJU_TO_KRONA(TAXANOMIC_CLASSIFICATION.out, ch_kaiju_nodes, ch_kaiju_names)
   KRONA_IMPORT_TEXT(KAIJU_TO_KRONA.out)
