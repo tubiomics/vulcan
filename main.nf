@@ -99,8 +99,6 @@ workflow {
     ch_target = Channel.value(params.target)
     ch_min = Channel.value(params.min)
 
-    // ch_target.view { "target: $it" }
-    // ch_min.view { "min: $it" }
     NORMALIZE_ERROR_CORRECT(ch_reads, ch_target, ch_min)
   }
 
