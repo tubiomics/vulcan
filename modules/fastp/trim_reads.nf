@@ -1,11 +1,14 @@
-process trimReads {
+process TRIM_READS {
+  label 'process_medium'
+  container 'tubiomics/vulcan-qc:latest'
+
   tag "$sample"
 
   input:
     tuple val(sample), file(reads)
 
   output:
-    path "$sample.*.gz"
+    tuple val(sample), path("$sample.*.gz")
 
   script:
     """

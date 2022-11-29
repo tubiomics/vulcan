@@ -62,123 +62,25 @@ log.info """
 
 }
 
-process countReads {
-  label 'process_low'
-
-  input:
-    path read
-
-  output:
-    path 'original_fastq_counts.txt'
-
-  script:
-    """
-    seqkit stats $read -T > original_fastq_counts.txt
-    """
-}
-
-process trimReads {
-  label 'process_medium'
-
-  tag "$sample"
-
-  input:
-    tuple val(sample), file(reads)
-
-  output:
-    tuple val(sample), path("$sample.*.gz")
-
-  script:
-    """
-    fastp \
-    -i ${reads[0]} \
-    -I ${reads[1]} \
-    -o "${sample}.trim.R1.fq.gz" \
-    -O "${sample}.trim.R2.fq.gz" \
-    --length_required 50 \
-    -h "${sample}.html" \
-    -w 16
-    """
-}
-
-process taxanomic_classification {
-  label 'process_medium'
-  tag "$sample"
-
-  input:
-    tuple val(sample), file(trimmed_reads)
-    path nodes
-    path db
-
-  output:
-    path "${sample}.kaiju.out"
-
-  script:
-    """
-    kaiju -t $nodes -f $db -i ${trimmed_reads[0]} -j ${trimmed_reads[1]} -o "${sample}.kaiju.out" -v
-    """
-}
-
-process kaiju_to_krona {
-  label 'process_low'
-
-  input:
-    path kaiju
-    path nodes
-    path names
-
-  output:
-    path "${kaiju.baseName}.kaiju.out.krona"
-  
-  script:
-  """
-  kaiju2krona -t ${nodes} -n ${names} -i ${kaiju} -o "${kaiju.baseName}.kaiju.out.krona"
-  """
-}
-
-process krona_import_text {
-  label 'process_low'
-
-  input:
-    path krona
-
-  output:
-    path "${krona.baseName}.kaiju.out.krona.html"
-    
-  script:
-  """
-  ktImportText -o "${krona.baseName}.kaiju.out.krona.html" ${krona}
-  """
-}
-
-process kaiju_to_table {
-  label 'process_low'
-  
-  input:
-    path kaiju
-    path nodes
-    path names
-  
-  output:
-    path "${kaiju.baseName}.kaiju.summary.tsv"
-
-  script:
-  """
-  kaiju2table -t ${nodes} -n ${names} -r species -l superkingdom,phylum,class,order,family,genus,species -o "${kaiju.baseName}.kaiju.summary.tsv" ${kaiju}
-  """
-}
+include { COUNT_READS } from './modules/seqkit/count_reads.nf'
+include { TRIM_READS  } from './modules/fastp/trim_reads.nf'
+include { TAXANOMIC_CLASSIFICATION}  from './modules/kaiju/taxanomic_classification.nf'
+include { KAIJU_TO_KRONA } from './modules/kaiju/kaiju_to_krona.nf'
+include { KRONA_IMPORT_TEXT } from './modules/kaiju/krona_import_text.nf'
+include { KAIJU_TO_TABLE } from './modules/kaiju/kaiju_to_table.nf'
 
 
 workflow {
-  kaiju_db_ch = Channel.fromPath("$params.kaiju_db", checkIfExists: true)
-  kaiju_nodes_ch = Channel.fromPath("$params.kaiju_nodes", checkIfExists: true)
-  kaiju_names_ch = Channel.fromPath("$params.kaiju_names", checkIfExists: true)
-  stats_ch = Channel.fromPath("$params.reads/*fastq.gz", checkIfExists: true)
-  trim_ch = Channel.fromFilePairs("$params.reads/*_{1,2}.fastq.gz", checkIfExists:true)
-  countReads(stats_ch)
-  trimReads(trim_ch)
-  taxanomic_classification(trimReads.out, kaiju_nodes_ch, kaiju_db_ch)
-  kaiju_to_krona(taxanomic_classification.out, kaiju_nodes_ch, kaiju_names_ch)
-  krona_import_text(kaiju_to_krona.out)
-  kaiju_to_table(taxanomic_classification.out, kaiju_nodes_ch, kaiju_names_ch)
+  ch_kaiju_db = Channel.fromPath("$params.kaiju_db", checkIfExists: true)
+  ch_kaiju_nodes = Channel.fromPath("$params.kaiju_nodes", checkIfExists: true)
+  ch_kaiju_names = Channel.fromPath("$params.kaiju_names", checkIfExists: true)
+  ch_stats = Channel.fromPath("$params.reads/*fastq.gz", checkIfExists: true)
+  ch_trim = Channel.fromFilePairs("$params.reads/*_{1,2}.fastq.gz", checkIfExists:true)
+
+  COUNT_READS(ch_stats)
+  TRIM_READS(ch_trim)
+  TAXANOMIC_CLASSIFICATION(TRIM_READS.out, ch_kaiju_nodes, ch_kaiju_db)
+  KAIJU_TO_KRONA(TAXANOMIC_CLASSIFICATION.out, ch_kaiju_nodes, ch_kaiju_names)
+  KRONA_IMPORT_TEXT(KAIJU_TO_KRONA.out)
+  KAIJU_TO_TABLE(TAXANOMIC_CLASSIFICATION.out, ch_kaiju_nodes, ch_kaiju_names)
 }
