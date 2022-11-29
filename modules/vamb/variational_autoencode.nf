@@ -8,7 +8,7 @@ process VARIATIONAL_AUTOENCODE {
     path depth
 
   output:
-    path 
+    path "vamb_folder"
 
   script:
     """
