@@ -13,4 +13,11 @@ RUN \
 # RUN micromamba update amos
 COPY minimus2 /opt/conda/bin/minimus2
 
+RUN \
+   micromamba install -y -n base -c defaults -c bioconda -c conda-forge \
+      perl-xml-parser \
+   && micromamba clean -a -y
+
+# RUN cpan XML::Parser
+
 
