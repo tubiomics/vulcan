@@ -105,7 +105,6 @@ workflow {
     ch_max_sequences = Channel.value(params.max_sequences)
 
     NORMALIZE_ERROR_CORRECT(ch_reads, ch_target, ch_min)
-    // NORMALIZE_ERROR_CORRECT.out.error_corrected_reads.view()
     ASSEMBLY(NORMALIZE_ERROR_CORRECT.out.error_corrected_reads, ch_max_sequences)
 
   }
