@@ -8,7 +8,7 @@ process TRIM_READS {
     tuple val(sample), file(reads)
 
   output:
-    tuple val(sample), path("$sample.*.gz")
+    tuple val(sample), path("$sample.*.gz"), emit: reads
 
   script:
     """

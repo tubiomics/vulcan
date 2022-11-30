@@ -19,8 +19,11 @@ workflow TAXANOMIC_ANALYSIS {
 
   COUNT_READS(reads)
   TRIM_READS(reads)
-  TAXANOMIC_CLASSIFICATION(TRIM_READS.out, nodes, db)
+  TAXANOMIC_CLASSIFICATION(TRIM_READS.out.reads, nodes, db)
   KAIJU_TO_KRONA(TAXANOMIC_CLASSIFICATION.out, nodes, names)
   KRONA_IMPORT_TEXT(KAIJU_TO_KRONA.out)
   KAIJU_TO_TABLE(TAXANOMIC_CLASSIFICATION.out, nodes, names)
+
+  emit:
+  trimmed_reads = TRIM_READS.out.reads // channel: [ val(sample), [ reads ] ]
 }
