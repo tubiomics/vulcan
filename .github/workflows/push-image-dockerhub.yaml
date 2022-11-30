@@ -27,6 +27,8 @@ jobs:
             name: vulcan-ec
           - dockerfile: docker/binning
             name: vulcan-binning
+          - dockerfile: docker/amos
+            name: vulcan-amos
 
     steps:
       -
