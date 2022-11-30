@@ -6,6 +6,7 @@ include { AMOS } from '../modules/amos/amos.nf'
 include { MINIMUS } from '../modules/amos/minimus.nf'
 include { CONCATENTATE_MINIMUS_FILES } from '../modules/amos/concatenate.nf'
 include { COUNT_READS } from '../modules/seqkit/count_reads_single.nf'
+include { INDEX_ASSEMBLY } from '../modules/bwa-mem2/index.nf'
 
 workflow ASSEMBLY {
 
@@ -23,7 +24,7 @@ workflow ASSEMBLY {
     MINIMUS(AMOS.out.amos_contigs, ch_sample)
     CONCATENTATE_MINIMUS_FILES(MINIMUS.out.fasta, MINIMUS.out.singletons, ch_sample)
     COUNT_READS(CONCATENTATE_MINIMUS_FILES.out.fasta, ch_sample)
-
+    INDEX_ASSEMBLY(CONCATENTATE_MINIMUS_FILES.out.fasta, ch_sample)
   emit:
     sample = MEGAHIT_ASSEMBLY.out.sample
     megahit_logs = MEGAHIT_ASSEMBLY.out.log
