@@ -79,6 +79,7 @@ include { TAXANOMIC_ANALYSIS } from './subworkflows/taxonomic_analysis.nf'
 include { METAGENOMIC_BINNING } from './subworkflows/metagenomic_binning.nf'
 include { NORMALIZE_ERROR_CORRECT } from './subworkflows/error_correct.nf'
 include { ASSEMBLY } from './subworkflows/assembly.nf'
+include { SAM_BINNING } from './subworkflows/binning.nf'
 
 workflow {
 
@@ -106,6 +107,7 @@ workflow {
 
     NORMALIZE_ERROR_CORRECT(ch_reads, ch_target, ch_min)
     ASSEMBLY(NORMALIZE_ERROR_CORRECT.out.error_corrected_reads, ch_max_sequences)
+    SAM_BINNING(TAXANOMIC_ANALYSIS.out.trimmed_reads, ASSEMBLY.out.index_directory, ASSEMBLY.out.sample)
 
   }
 

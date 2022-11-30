@@ -8,10 +8,12 @@ process INDEX_ASSEMBLY {
     path index_folder
   
   output:
+    path "${sample}.sam", emit: sam_file
+    val sample
     
   
   script:
   """
-  bwa-mem2 mem -t 40 -o "${sample}.sam" "index/${sample}" ${reads[0]} ${reads[1]}
+  bwa-mem2 mem -t 40 -o "${sample}.sam" ${sample} ${reads[0]} ${reads[1]}
   """
 }
