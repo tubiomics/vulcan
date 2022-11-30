@@ -4,16 +4,14 @@ process INDEX_ASSEMBLY {
   container 'tubiomics/vulcan-binning'
   
   input:
-    path fasta
-    val sample
+    tuple( val(sample), path(reads) )
+    path index_folder
   
   output:
-    path "index/${sample}.*", emit: index_directory
     
   
   script:
   """
-  mkdir index
-  bwa-mem2 index -p "index/${sample}" ${fasta}
+  bwa-mem2 mem -t 40 -o "${sample}.sam" "index/${sample}" ${reads[0]} ${reads[1]}
   """
 }

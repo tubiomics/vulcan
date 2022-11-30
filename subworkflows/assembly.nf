@@ -25,9 +25,11 @@ workflow ASSEMBLY {
     CONCATENTATE_MINIMUS_FILES(MINIMUS.out.fasta, MINIMUS.out.singletons, ch_sample)
     COUNT_READS(CONCATENTATE_MINIMUS_FILES.out.fasta, ch_sample)
     INDEX_ASSEMBLY(CONCATENTATE_MINIMUS_FILES.out.fasta, ch_sample)
+    
   emit:
     sample = MEGAHIT_ASSEMBLY.out.sample
     megahit_logs = MEGAHIT_ASSEMBLY.out.log
     stats = COUNT_READS.out.stats
+    index_directory = INDEX_ASSEMBLY.out.index_directory
 
 }
