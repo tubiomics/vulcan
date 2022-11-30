@@ -16,7 +16,7 @@ process ERROR_CORRECT {
     tadpole.sh \
     in1=${reads[0]} \
     in2=${reads[1]} \
-    out1="${sample}.ecc.${target}.${min}.R1.fq.gz"
+    out1="${sample}.ecc.${target}.${min}.R1.fq.gz" \
     out2="${sample}.ecc.${target}.${min}.R2.fq.gz" \
     mode=correct \
     k=50 \

@@ -14,6 +14,9 @@ params.kaiju_nodes = "$projectDir/data/kaijudb/viruses/nodes.dmp"
 // NORMALIZE_ERROR_CORRECT inputs
 params.target = 100
 params.min = 5
+
+// assembly inputs
+params.max_sequences = 2500
 // METAGENOMIC_BINNING inputs
 params.contigs = "$projectDir/data/assemblies/C.final.merged.fasta"
 params.depth = "$projectDir/data/assemblies/depth.txt"
@@ -75,6 +78,7 @@ log.info """
 include { TAXANOMIC_ANALYSIS } from './subworkflows/taxonomic_analysis.nf'
 include { METAGENOMIC_BINNING } from './subworkflows/metagenomic_binning.nf'
 include { NORMALIZE_ERROR_CORRECT } from './subworkflows/error_correct.nf'
+include { ASSEMBLY } from './subworkflows/assembly.nf'
 
 workflow {
 
@@ -98,8 +102,12 @@ workflow {
   if ( params.all_workflows || params.error_correct ) {
     ch_target = Channel.value(params.target)
     ch_min = Channel.value(params.min)
+    ch_max_sequences = Channel.value(params.max_sequences)
 
     NORMALIZE_ERROR_CORRECT(ch_reads, ch_target, ch_min)
+    // NORMALIZE_ERROR_CORRECT.out.error_corrected_reads.view()
+    ASSEMBLY(NORMALIZE_ERROR_CORRECT.out.error_corrected_reads, ch_max_sequences)
+
   }
 
   if ( params.all_workflows || params.metagenomic_binning ) {

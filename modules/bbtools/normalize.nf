@@ -17,7 +17,7 @@ process NORMALIZE {
     in1=${reads[0]} \
     in2=${reads[1]} \
     out1="${sample}.norm.${target}.${min}.R1.fq.gz" \
-    out2=c"${sample}.norm.${target}.${min}.R2.fq.gz" \
+    out2="${sample}.norm.${target}.${min}.R2.fq.gz" \
     target=${target} \
     min=${min} \
     prefilter=t \
