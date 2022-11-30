@@ -3,6 +3,8 @@ include { SEQKIT_REPLACE } from '../modules/seqkit/replace.nf'
 include { SEQTK_FILTER } from '../modules/seqtk/filter.nf'
 include { CLUSTER_SIMILAR_PROTEINS } from '../modules/cdhit/cluster_similar_proteins.nf'
 include { AMOS } from '../modules/amos/amos.nf'
+include { MINIMUS } from '../modules/amos/minimus.nf'
+include { CONCATENTATE_MINIMUS_FILES } from '../modules/amos/concatenate.nf'
 
 workflow ASSEMBLY {
 
@@ -17,6 +19,8 @@ workflow ASSEMBLY {
     SEQTK_FILTER(SEQKIT_REPLACE.out.contigs_replaced, ch_sample, max_sequences)
     CLUSTER_SIMILAR_PROTEINS(SEQTK_FILTER.out.filtered_contigs, ch_sample, max_sequences)
     AMOS(CLUSTER_SIMILAR_PROTEINS.out.clustered_contigs, ch_sample)
+    MINIMUS(AMOS.out.amos_contigs, ch_sample)
+    CONCATENTATE_MINIMUS_FILES(MINIMUS.out.fasta, MINIMUS.out.singletons, ch_sample)
 
   emit:
     sample = MEGAHIT_ASSEMBLY.out.sample
