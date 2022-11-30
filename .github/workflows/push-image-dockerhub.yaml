@@ -25,6 +25,8 @@ jobs:
             name: vulcan-mbpy3
           - dockerfile: docker/error-correction
             name: vulcan-ec
+          - dockerfile: docker/binning
+            name: vulcan-binning
 
     steps:
       -
