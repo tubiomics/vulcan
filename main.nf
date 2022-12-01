@@ -109,16 +109,10 @@ workflow {
     NORMALIZE_ERROR_CORRECT(ch_reads, ch_target, ch_min)
     ASSEMBLY(NORMALIZE_ERROR_CORRECT.out.error_corrected_reads, ch_max_sequences)
     SAM_BINNING(TAXANOMIC_ANALYSIS.out.trimmed_reads, ASSEMBLY.out.index_directory, ASSEMBLY.out.sample)
-    METAGENOMIC_BINNING(SAM_BINNING.out.sorted_bam_file, SAM_BINNING.out.sample, ASSEMBLY.out.contigs)
   }
 
   if ( params.all_workflows || params.metagenomic_binning ) {
-    ch_contigs = Channel.fromPath("$params.contigs", checkIfExists: true)
-    ch_depth = Channel.fromPath("$params.depth", checkIfExists: true)
+    METAGENOMIC_BINNING(SAM_BINNING.out.sorted_bam_file, SAM_BINNING.out.sample, ASSEMBLY.out.contigs)
 
-    METAGENOMIC_BINNING(
-      ch_contigs,
-      ch_depth
-    )
   }
 }

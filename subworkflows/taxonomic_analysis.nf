@@ -25,5 +25,5 @@ workflow TAXANOMIC_ANALYSIS {
   KAIJU_TO_TABLE(TAXANOMIC_CLASSIFICATION.out, nodes, names)
 
   emit:
-  trimmed_reads = TRIM_READS.out.reads // channel: [ val(sample), [ reads ] ]
+  trimmed_reads = TRIM_READS.out.reads // channel: [ val(sample), [ trimmed reads ] ]
 }
