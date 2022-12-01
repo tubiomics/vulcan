@@ -31,5 +31,5 @@ workflow ASSEMBLY {
     megahit_logs = MEGAHIT_ASSEMBLY.out.log
     stats = COUNT_READS.out.stats
     index_directory = INDEX_ASSEMBLY.out.index_directory
-
+    contigs = CONCATENTATE_MINIMUS_FILES.out.fasta
 }

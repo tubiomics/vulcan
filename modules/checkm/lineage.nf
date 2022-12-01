@@ -1,4 +1,4 @@
-process LINEAGE {
+process CHECKM_LINEAGE {
 
   label 'process_medium'
   container 'tubiomics/vulcan-mbpy3'

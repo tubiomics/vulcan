@@ -16,4 +16,8 @@ workflow SAM_BINNING {
     SAMTOOLS_SORT( SAMTOOLS_VIEW.out.bam_file, sample)
     SAMTOOLS_INDEX ( SAMTOOLS_SORT.out.sorted_bam_file, sample )
     SAMTOOLS_FLAGSTAT( SAMTOOLS_INDEX.out.bam_file, sample)
+
+  emit:
+    sorted_bam_file = SAMTOOLS_INDEX.out.bam_file   // channel: /path/to/sorted/bam/file
+    sample                                          // channel: val(sample)
 }
