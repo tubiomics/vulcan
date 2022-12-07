@@ -108,7 +108,7 @@ workflow {
 
     NORMALIZE_ERROR_CORRECT(ch_reads, ch_target, ch_min)
     ASSEMBLY(NORMALIZE_ERROR_CORRECT.out.error_corrected_reads, ch_max_sequences)
-    SAM_BINNING(TAXANOMIC_ANALYSIS.out.trimmed_reads, ASSEMBLY.out.index_directory, ASSEMBLY.out.sample)
+    // SAM_BINNING(TAXANOMIC_ANALYSIS.out.trimmed_reads, ASSEMBLY.out.index_directory, ASSEMBLY.out.sample)
   }
 
   if ( params.all_workflows || params.metagenomic_binning ) {

@@ -12,7 +12,7 @@ process VARIATIONAL_AUTOENCODE {
 
   script:
     """
-    vamb --outdir vamb_folder --fasta ${contigs} --jgi ${depth} --minfasta 200000
+    vamb --outdir vamb_folder --fasta ${contigs} --jgi ${depth} --minfasta 1
     """
 }
 
