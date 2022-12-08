@@ -7,7 +7,7 @@ process MEGAHIT_ASSEMBLY {
     tuple val(sample), file(reads)
 
   output:
-    path "./megahit_out/${sample}.contigs.fa", emit: contigs_fa
+    path "./megahit_out/${sample}.contigs.fa", emit: contigs
     path "./megahit_out/${sample}.log", emit: log
     val sample, emit: sample
 

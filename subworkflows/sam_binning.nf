@@ -6,7 +6,7 @@ include { SAMTOOLS_FLAGSTAT } from '../modules/samtools/flagstat.nf'
 
 workflow SAM_BINNING {
   take:
-    reads        // channel: [ val(sample), [ trimmed reads ] ]
+    reads          // channel: [ val(sample), [ trimmed reads ] ]
     index_folder
     sample
 

@@ -1,35 +1,23 @@
+include { NORMALIZE } from '../modules/bbtools/normalize.nf'
+include { ERROR_CORRECT  } from '../modules/bbtools/error_correct.nf'
 include { MEGAHIT_ASSEMBLY } from '../modules/megahit/assemble.nf'
-include { SEQKIT_REPLACE } from '../modules/seqkit/replace.nf'
-include { SEQTK_FILTER } from '../modules/seqtk/filter.nf'
-include { CLUSTER_SIMILAR_PROTEINS } from '../modules/cdhit/cluster_similar_proteins.nf'
-include { AMOS } from '../modules/amos/amos.nf'
-include { MINIMUS } from '../modules/amos/minimus.nf'
-include { CONCATENTATE_MINIMUS_FILES } from '../modules/amos/concatenate.nf'
-include { COUNT_READS } from '../modules/seqkit/count_reads_single.nf'
-include { INDEX_ASSEMBLY } from '../modules/bwa-mem2/index.nf'
 
-workflow ASSEMBLY {
+workflow ASSEMBLY_WITH_ERROR_CORRECT {
 
   take:
-    reads   // channel: [ val(sample), [ reads ] ]
-    max_sequences  // string : integer drop sequences with length shorter than INT
+    reads         // channel: [ val(sample), [ reads ] ]
+    target        // channel: value: integer
+    min           // channel: value: integer
 
   main:
-    MEGAHIT_ASSEMBLY(reads)
-    ch_sample = MEGAHIT_ASSEMBLY.out.sample
-    SEQKIT_REPLACE(ch_sample, MEGAHIT_ASSEMBLY.out.contigs_fa)
-    SEQTK_FILTER(SEQKIT_REPLACE.out.contigs_replaced, ch_sample, max_sequences)
-    CLUSTER_SIMILAR_PROTEINS(SEQTK_FILTER.out.filtered_contigs, ch_sample, max_sequences)
-    AMOS(CLUSTER_SIMILAR_PROTEINS.out.clustered_contigs, ch_sample)
-    MINIMUS(AMOS.out.amos_contigs, ch_sample)
-    CONCATENTATE_MINIMUS_FILES(MINIMUS.out.fasta, MINIMUS.out.singletons, ch_sample)
-    COUNT_READS(CONCATENTATE_MINIMUS_FILES.out.fasta, ch_sample)
-    INDEX_ASSEMBLY(CONCATENTATE_MINIMUS_FILES.out.fasta, ch_sample)
-    
+
+  NORMALIZE(reads, target, min)
+  ERROR_CORRECT(NORMALIZE.out.normalized_reads, target, min)
+  MEGAHIT_ASSEMBLY(reads)
+
   emit:
-    sample = MEGAHIT_ASSEMBLY.out.sample
-    megahit_logs = MEGAHIT_ASSEMBLY.out.log
-    stats = COUNT_READS.out.stats
-    index_directory = INDEX_ASSEMBLY.out.index_directory
-    contigs = CONCATENTATE_MINIMUS_FILES.out.fasta
+    error_corrected_reads   = ERROR_CORRECT.out.error_corrected_reads  // channel: [ val(sample), [ reads ] ]
+    sample = MEGAHIT_ASSEMBLY.out.sample                               // channel: val(sample)
+    megahit_logs = MEGAHIT_ASSEMBLY.out.log                            // channel: path/to/assembly/logs
+    contigs = MEGAHIT_ASSEMBLY.out.contigs                             // channel: path/to/assembly/contigs.fa
 }

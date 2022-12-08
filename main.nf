@@ -15,8 +15,10 @@ params.kaiju_nodes = "$projectDir/data/kaijudb/viruses/nodes.dmp"
 params.target = 100
 params.min = 5
 
-// assembly inputs
+// Post Assembly Processing Phase
 params.max_sequences = 2500
+params.contigs = "$projectDir/data/raw/assemblies/USDA_soil_C35.combined.contigs.fa"
+params.sample = "USDA_soil_C35"
 // METAGENOMIC_BINNING inputs
 params.contigs = "$projectDir/data/assemblies/C.final.merged.fasta"
 params.depth = "$projectDir/data/assemblies/depth.txt"
@@ -77,14 +79,21 @@ log.info """
 
 include { TAXANOMIC_ANALYSIS } from './subworkflows/taxonomic_analysis.nf'
 include { METAGENOMIC_BINNING } from './subworkflows/metagenomic_binning.nf'
-include { NORMALIZE_ERROR_CORRECT } from './subworkflows/error_correct.nf'
-include { ASSEMBLY } from './subworkflows/assembly.nf'
+// include { NORMALIZE_ERROR_CORRECT } from './subworkflows/error_correct.nf'
+include { ASSEMBLY_WITH_ERROR_CORRECT } from './subworkflows/assembly.nf'
+include { POST_ASSEMBLY_PROCESSING } from './subworkflows/index_assemblies.nf'
 include { SAM_BINNING } from './subworkflows/sam_binning.nf'
 include { METAGENOMIC_BINNING } from './subworkflows/metagenomic_binning.nf'
 
 workflow {
 
   ch_reads = Channel.fromFilePairs("$params.reads", checkIfExists:true)
+  ch_target = Channel.value(params.target)
+  ch_min = Channel.value(params.min)
+  ch_max_sequences = Channel.value(params.max_sequences)
+
+  ch_sample = Channel.value(params.sample)
+  ch_contigs = Channel.fromPath(params.contigs, checkIfExists:true)
 
   if (params.all_workflows ||  params.taxanomic_analysis) {
 
@@ -101,15 +110,15 @@ workflow {
     )
   }
 
-  if ( params.all_workflows || params.error_correct ) {
-    ch_target = Channel.value(params.target)
-    ch_min = Channel.value(params.min)
-    ch_max_sequences = Channel.value(params.max_sequences)
-
-    NORMALIZE_ERROR_CORRECT(ch_reads, ch_target, ch_min)
-    ASSEMBLY(NORMALIZE_ERROR_CORRECT.out.error_corrected_reads, ch_max_sequences)
-    // SAM_BINNING(TAXANOMIC_ANALYSIS.out.trimmed_reads, ASSEMBLY.out.index_directory, ASSEMBLY.out.sample)
+  if ( !params.skip_assembly ) {
+    ASSEMBLY_WITH_ERROR_CORRECT(ch_reads, ch_target, ch_min)
   }
+
+  if ( params.all_workflows || params.process_assembly ) {
+    POST_ASSEMBLY_PROCESSING(ch_contigs, ch_sample, ch_max_sequences)
+  }
+
+  SAM_BINNING(TAXANOMIC_ANALYSIS.out.trimmed_reads, POST_ASSEMBLY_PROCESSING.out.index_directory, ch_sample)
 
   if ( params.all_workflows || params.metagenomic_binning ) {
     METAGENOMIC_BINNING(SAM_BINNING.out.sorted_bam_file, SAM_BINNING.out.sample, ASSEMBLY.out.contigs)
