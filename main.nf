@@ -7,6 +7,7 @@ params.help = ""
 
 // TAXANOMIC_ANALYSIS inputs
 params.reads = "$projectDir/data/raw/reads/*_{1,2}.fastq.gz"
+
 params.kaiju_db = "$projectDir/data/kaijudb/viruses/kaiju_db_viruses.fmi"
 params.kaiju_names = "$projectDir/data/kaijudb/viruses/names.dmp"
 params.kaiju_nodes = "$projectDir/data/kaijudb/viruses/nodes.dmp"
@@ -16,12 +17,12 @@ params.target = 100
 params.min = 5
 
 // Post Assembly Processing Phase
-params.max_sequences = 2500
-params.contigs = "$projectDir/data/raw/assemblies/USDA_soil_C35.combined.contigs.fa"
+params.max_sequences = 10000
 params.sample = "USDA_soil_C35"
 // METAGENOMIC_BINNING inputs
-params.contigs = "$projectDir/data/assemblies/C.final.merged.fasta"
-params.depth = "$projectDir/data/assemblies/depth.txt"
+params.contigs = "$projectDir/data/vamb/test_50Kcontigs.fasta"
+params.depth = "$projectDir/data/vamb/test_50Kdepth.txt"
+params.vamb_options = "-e 15"
 
 ANSI_GREEN = "\033[1;32m"
 ANSI_RED = "\033[1;31m"
@@ -46,6 +47,9 @@ log.info """
          --kaiju_names      : ${params.kaiju_names}
          --kaiju_nodes      : ${params.kaiju_nodes}
          --max_memory       : ${params.max_memory}
+         --contigs          : ${params.contigs}
+         --depth            : ${params.depth}
+         --vamb_options     : ${params.vamb_options}
 
 
          Runtime data:
@@ -94,6 +98,8 @@ workflow {
 
   ch_sample = Channel.value(params.sample)
   ch_contigs = Channel.fromPath(params.contigs, checkIfExists:true)
+  ch_depth = Channel.fromPath(params.depth, checkIfExists:true)
+  ch_vamb_options = Channel.value(params.vamb_options)
 
   if (params.all_workflows ||  params.taxanomic_analysis) {
 
@@ -118,10 +124,11 @@ workflow {
     POST_ASSEMBLY_PROCESSING(ch_contigs, ch_sample, ch_max_sequences)
   }
 
-  SAM_BINNING(TAXANOMIC_ANALYSIS.out.trimmed_reads, POST_ASSEMBLY_PROCESSING.out.index_directory, ch_sample)
+  // SAM_BINNING(TAXANOMIC_ANALYSIS.out.trimmed_reads, POST_ASSEMBLY_PROCESSING.out.index_directory, ch_sample)
 
   if ( params.all_workflows || params.metagenomic_binning ) {
-    METAGENOMIC_BINNING(SAM_BINNING.out.sorted_bam_file, SAM_BINNING.out.sample, ASSEMBLY.out.contigs)
+
+    METAGENOMIC_BINNING(ch_sample, ch_contigs, ch_depth)
 
   }
 }
